@@ -12,9 +12,9 @@ class ViewController: UIViewController {
     @IBOutlet private weak var tableView: UITableView!
 
     private var todoList = [MyTodo]()
-    private let alertController :UIAlertController = UIAlertController(title: "TODO追加", message: "TODOを追加してください", preferredStyle: .Alert)
+    private let alertController = UIAlertController(title: "TODO追加", message: "TODOを追加してください", preferredStyle: .Alert)
     private let userDefaults = NSUserDefaults.standardUserDefaults()
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         initializeAlertController()
@@ -25,16 +25,15 @@ class ViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
+
     private func initializeAlertController () {
         alertController.addTextFieldWithConfigurationHandler(nil)
-        let okAction = UIAlertAction(title: "OK", style: .Default, handler: {
-            (action: UIAlertAction) in
-            if let textField = self.alertController.textFields?.first, text = textField.text {
+        let okAction = UIAlertAction(title: "OK", style: .Default, handler: { [weak self] (action: UIAlertAction) in
+            if let textField = self?.alertController.textFields?.first, text = textField.text {
                 let todo = MyTodo(title: text)
-                self.todoList.insert(todo, atIndex: 0)
-                self.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: .Right)
-                self.syncTodoList()
+                self?.todoList.insert(todo, atIndex: 0)
+                self?.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: .Right)
+                self?.syncTodoList()
                 textField.text = ""
             }
         })
@@ -49,24 +48,24 @@ class ViewController: UIViewController {
             todoList.appendContentsOf(storedTodoList)
         }
     }
-    
+
     private func syncTodoList () {
-        let data :NSData = NSKeyedArchiver.archivedDataWithRootObject(self.todoList)
+        let data: NSData = NSKeyedArchiver.archivedDataWithRootObject(self.todoList)
         self.userDefaults.setObject(data, forKey: "todoList")
         self.userDefaults.synchronize()
     }
-    
-    @IBAction func tapAddButton(sender: AnyObject) {
+
+    @IBAction func tapAddButton(sender: UIButton) {
         presentViewController(alertController, animated: true, completion: nil)
     }
 }
 
 extension ViewController: UITableViewDataSource {
-    
+
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return todoList.count
     }
-    
+
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("todoCell", forIndexPath: indexPath)
         let todo = todoList[indexPath.row]
@@ -74,11 +73,11 @@ extension ViewController: UITableViewDataSource {
         cell.accessoryType = todo.todoDone ? .Checkmark : .None
         return cell
     }
-    
+
     func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         return true
     }
-    
+
     func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
             todoList.removeAtIndex(indexPath.row)
@@ -89,7 +88,7 @@ extension ViewController: UITableViewDataSource {
 }
 
 extension ViewController: UITableViewDelegate {
-    
+
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         let todo = todoList[indexPath.row]
         todo.todoDone = !todo.todoDone
